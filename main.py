@@ -5,7 +5,7 @@ import sqlite3
 from random import choice, shuffle
 
 app = FastAPI()
-db = sqlite3.connect("data3.db")
+db = sqlite3.connect("data.db")
 
 cur = db.cursor()
 MEMES_COUNT = cur.execute("SELECT COUNT(*) FROM memes").fetchone()[0]
@@ -99,12 +99,11 @@ async def stats(pretty: bool, secret: str = None):
 
     if pretty:
         out = "Топ-5 мемов:\n"
-        for (id, _, name, _, url, likes, _, _, _) in req_top_five:
+        for (id, _, name, _, url, likes, _) in req_top_five:
             out += f"[ {id} ] : {url}, Автор: {name}, {likes} ❤️\n"
 
         out += "\nПоследние пять действий:\n"
         for (id, url, date, likes, skips, isLiked) in last_five_actions:
-            print((id, url, date, likes, skips, isLiked))
             out += f"[ {id}, {date} ] : {url}, {likes} лайк(-ов), {skips} скип(-ов), Тип - {'Лайк' if isLiked else 'Скип'}\n"
 
         return PlainTextResponse(content=out)

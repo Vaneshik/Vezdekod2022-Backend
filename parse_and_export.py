@@ -4,9 +4,9 @@ from datetime import datetime
 
 
 def init_database() -> sqlite3.Connection:
-    sqlite3_db = sqlite3.connect('data2.db')
+    sqlite3_db = sqlite3.connect('data.db')
 
-    query = '''
+    query_memes = '''
     CREATE TABLE memes (
         id INTEGER PRIMARY KEY,
         user_id INTEGER NOT NULL,
@@ -14,13 +14,22 @@ def init_database() -> sqlite3.Connection:
         url text NOT NULL UNIQUE,
         short_url text NOT NULL UNIQUE,
         likes INTEGER NOT NULL,
-        skips INTEGER, 
+        skips INTEGER);
+    '''
+
+    query_logs = '''
+    CREATE TABLE logs (
+        id INTEGER NOT NULL,
+        url STRING NOT NULL, 
         date timestamp NOT NULL,
-        likes_changed INTEGER);
+        likes INTEGER NOT NULL,
+        skips INTEGER NOT NULL,
+        isLiked INTEGER NOT NULL);
     '''
 
     cur = sqlite3_db.cursor()
-    cur.execute(query)
+    cur.execute(query_memes)
+    cur.execute(query_logs)
     sqlite3_db.commit()
     cur.close()
 
@@ -49,7 +58,7 @@ def parse_data(vk: vk_api.vk_api.VkApiMethod, pool: list) -> list:
 
     for photo_obj in pool:
         temp = {"url": "", "short_url": "",
-                "likes": 0, "user_id": 0, "name": "", "date": ""}
+                "likes": 0, "user_id": 0, "name": ""}
 
         sizes = photo_obj["sizes"]
 
@@ -68,7 +77,6 @@ def parse_data(vk: vk_api.vk_api.VkApiMethod, pool: list) -> list:
         temp["likes"] = photo_obj["likes"]["count"]
         temp["user_id"] = photo_obj["user_id"]
         temp["name"] = name
-        temp["date"] = datetime.now()
 
         print(temp)
         out.append(temp)
@@ -81,12 +89,12 @@ def export_in_db(db: sqlite3.Connection, data: list) -> None:
 
     for item in data:
         query = f"""
-        INSERT INTO memes (url, short_url, likes, user_id, name, skips, date)
-        VALUES (?, ?, ?, ?, ?, 0, ?)
+        INSERT INTO memes (url, short_url, likes, user_id, name, skips)
+        VALUES (?, ?, ?, ?, ?, 0)
         """
 
         cur.execute(query, (item['url'], item['short_url'],
-                    item['likes'], item['user_id'], item['name'], item["date"]))
+                    item['likes'], item['user_id'], item['name']))
 
     db.commit()
     cur.close()
