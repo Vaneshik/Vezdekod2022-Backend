@@ -5,7 +5,7 @@ import sqlite3
 from random import choice, shuffle
 
 app = FastAPI()
-db = sqlite3.connect("data3__.db")
+db = sqlite3.connect("data3.db")
 
 cur = db.cursor()
 MEMES_COUNT = cur.execute("SELECT COUNT(*) FROM memes").fetchone()[0]
